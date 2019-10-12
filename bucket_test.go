@@ -3,14 +3,10 @@ package rates
 import (
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestBucket(t *testing.T) {
-	Convey("Bucket", t, func() {
-		Convey("NewBucket()", func() {
-			So(NewBucket(nil), ShouldHaveSameTypeAs, &infiniteBucket{})
-			So(NewBucket(&BucketConfig{}), ShouldHaveSameTypeAs, &ticketBucket{})
-		})
-	})
+func TestNewBucket(t *testing.T) {
+	assert.IsType(t, &infiniteBucket{}, NewBucket(nil), "it should return an infinite bucket if no config is provided")
+	assert.IsType(t, &ticketBucket{}, NewBucket(&BucketConfig{}), "it should return a ticket bucket if a config is provided")
 }

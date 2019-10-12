@@ -4,37 +4,40 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestInfiniteBucket(t *testing.T) {
-	Convey("InfiniteBucket", t, func() {
-		bucket := NewBucket(nil)
+	bucket := NewBucket(nil)
+	require.NotNil(t, bucket, "it should return a bucket")
 
-		Convey("Add", func() {
-			bucket.Add(200)
-			So(bucket.Take(), ShouldBeTrue)
-		})
+	t.Run("Add()", func(t *testing.T) {
+		bucket.Add(200)
+		assert.True(t, bucket.Take())
+	})
 
-		Convey("Remove", func() {
-			bucket.Remove(10)
-			So(bucket.Take(), ShouldBeTrue)
-			bucket.Remove(200)
-			So(bucket.Take(), ShouldBeTrue)
-		})
+	t.Run("Remove()", func(t *testing.T) {
+		bucket.Remove(10)
+		assert.True(t, bucket.Take())
 
-		Convey("Take", func() {
-			bucket.Remove(200)
-			So(bucket.Take(), ShouldBeTrue)
+		bucket.Remove(200)
+		assert.True(t, bucket.Take())
+	})
 
-			bucket.Add(1)
-			So(bucket.Take(), ShouldBeTrue)
-		})
+	t.Run("Take()", func(t *testing.T) {
+		bucket.Remove(200)
+		assert.True(t, bucket.Take())
 
-		Convey("TakeWhenAvailable", func() {
-			start := time.Now()
-			So(<-bucket.TakeWhenAvailable(), ShouldNotBeNil)
-			So(time.Now().Sub(start).Seconds(), ShouldAlmostEqual, 0, 0.1)
-		})
+		bucket.Add(1)
+		assert.True(t, bucket.Take())
+	})
+
+	t.Run("TakeWhenAvailable()", func(t *testing.T) {
+		select {
+		case <-bucket.TakeWhenAvailable():
+		case <-time.After(100 * time.Millisecond):
+			t.Error("Timed out waiting for a token")
+		}
 	})
 }
