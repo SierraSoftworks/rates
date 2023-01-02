@@ -46,7 +46,7 @@ func TestTicketBucket(t *testing.T) {
 
 		bucket.Add(1)
 		assert.True(t, bucket.Take(), "it should allow us to remove a token once one is available")
-		assert.Less(t, normalBucket.Tickets, 1, "it should have no tickets left afterwards")
+		assert.Less(t, normalBucket.Tickets, float64(1), "it should have no tickets left afterwards")
 	})
 
 	t.Run("TakeWhenAvailable()", func(t *testing.T) {
