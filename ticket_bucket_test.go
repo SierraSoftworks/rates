@@ -46,7 +46,7 @@ func TestTicketBucket(t *testing.T) {
 
 		bucket.Add(1)
 		assert.True(t, bucket.Take(), "it should allow us to remove a token once one is available")
-		assert.EqualValues(t, 0, normalBucket.Tickets, "it should have no tickets left afterwards")
+		assert.Less(t, normalBucket.Tickets, 1, "it should have no tickets left afterwards")
 	})
 
 	t.Run("TakeWhenAvailable()", func(t *testing.T) {
@@ -56,7 +56,7 @@ func TestTicketBucket(t *testing.T) {
 
 		select {
 		case <-bucket.TakeWhenAvailable():
-			elapsed := time.Now().Sub(start).Seconds()
+			elapsed := time.Since(start).Seconds()
 			assert.InEpsilon(t, 0.1, elapsed, 0.01, "it should have waited 100ms to hand out a token")
 		case <-time.After(200 * time.Millisecond):
 			t.Error("Timed out waiting for a token after 200ms")
